@@ -19,6 +19,7 @@ class MP4Player {
         this.AudioCountSample = 0;
         this.videoFrameIndex = 0;
         this.audioFrameIndex = 0;
+        this.offscreenCanvas = null;
         this.init();
     }
 
@@ -190,10 +191,15 @@ class MP4Player {
         this.checkVideoAndAudioFrame();
         console.log('视频和音频解码完成，开始播放');
 
+        // 禁用播放按钮
+        this.playButton.disabled = true;
+
         const canvas = document.getElementById('canvas');
-        const view = canvas.transferControlToOffscreen();
+        if (this.offscreenCanvas === null) {
+            this.offscreenCanvas = canvas.transferControlToOffscreen();
+        }
         const app = new PIXI.Application({
-            view,
+            view: this.offscreenCanvas,
             width: this.videoWidth,
             height: this.videoHeight,
             resolution: 1
@@ -264,6 +270,11 @@ class MP4Player {
         };
 
         draw();
+
+        // 播放结束后启用播放按钮
+        source.onended = () => {
+            this.playButton.disabled = false;
+        };
     }
 
 
